@@ -39,6 +39,30 @@ class MCPAcademicServer:
         # 3. Đóng gói phản hồi và trả về Dict theo đúng chuẩn giao thức MCP JSON-RPC 2.0:
         #    - Các trường bắt buộc: "jsonrpc": "2.0", "server": self.server_name, "tool": tool_name, "result": content
         # --------------------------------------------------------------------------
+        result = dispatch_tool_call(tool_name, arguments)
+        if result is None:
+            return {
+                "jsonrpc": "2.0",
+                "server": self.server_name,
+                "tool": tool_name,
+                "error": f"Tool '{tool_name}' not found or failed to execute."
+            }
+        try:
+            content = json.loads(result)
+            return {
+                "jsonrpc": "2.0",
+                "server": self.server_name,
+                "tool": tool_name,
+                "result": content
+            }
+        except json.JSONDecodeError:
+            return {
+                "jsonrpc": "2.0",
+                "server": self.server_name,
+                "tool": tool_name,
+                "error": f"Failed to decode JSON from tool '{tool_name}': {result}"
+            }
+        
         return {}
 
 
